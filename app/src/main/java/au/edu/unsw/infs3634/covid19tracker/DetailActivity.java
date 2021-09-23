@@ -32,7 +32,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     public void playVideo() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=5qap5aO4i9A"));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=BtN-goy9VOY"));
         startActivity(intent);
     }
 
