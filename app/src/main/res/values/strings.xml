@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Covid19Tracker</string>
-    <string name="hello_world">Hello World!</string>
+    <string name="hello_world">Hello From Covid19Tracker App!</string>
+    <string name="launch_detail_activity">Launch Detail Activity</string>
+    <string name="msg_from_main"></string>
+    <string name="btnshow_video">Show Video</string>
 </resources>
