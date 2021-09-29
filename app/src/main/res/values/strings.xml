@@ -2,6 +2,11 @@
     <string name="app_name">Covid19Tracker</string>
     <string name="hello_world">Hello From Covid19Tracker App!</string>
     <string name="launch_detail_activity">Launch Detail Activity</string>
-    <string name="msg_from_main"></string>
-    <string name="btnshow_video">Show Video</string>
+    <string name="NewCases"></string>
+    <string name="TotalCases"></string>
+    <string name="NewDeaths"></string>
+    <string name="TotalDeaths"></string>
+    <string name="NewRecovered"></string>
+    <string name="TotalRecovered"></string>
+    <string name="Country"></string>
 </resources>

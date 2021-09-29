@@ -30,24 +30,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 launchDetailActivity();
-                extraMessage();
+//                extraMessage();
             }
         });
     }
 
     public void launchDetailActivity() {
-        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-        startActivity(intent);
         Log.d(TAG, "onCreate: Starting launch");
-
-    }
-
-    public void extraMessage(){
-        String extraMessage = "This message came from MainActivity";
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("eMessage", extraMessage);
+        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+        String message = "40735414-f500-4ba6-a05f-375fb7e93db8";
+        intent.putExtra("eMessage", message);
         startActivity(intent);
+
     }
+
+//    public void extraMessage(){
+//        //String extraMessage = "This message came from MainActivity";
+//        Intent intent = new Intent(this, DetailActivity.class);
+//        String message = "40735414-f500-4ba6-a05f-375fb7e93db8";
+//        intent.putExtra("eMessage", extraMessage);
+//        startActivity(intent);
+//    }
 
 
 }
