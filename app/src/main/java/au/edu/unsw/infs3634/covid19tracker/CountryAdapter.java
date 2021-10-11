@@ -4,17 +4,24 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Locale;
 
-public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewHolder> {
+public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewHolder> implements Filterable {
     public ArrayList<Country> mCountries;
+    public ArrayList<Country> mCountriesFiltered;
     public clickListener mListener;
 
     public CountryAdapter(Context context, ArrayList<Country> countries, clickListener listener ){
         this.mCountries = countries;
+        this.mCountriesFiltered = countries;            //this is so that everytime you search, you keep orignial copy
         this.mListener = listener;
     }
 
@@ -29,7 +36,7 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
     //bind data to textview elements in each row
     @Override
     public void onBindViewHolder(@NonNull CountryAdapter.MyViewHolder holder, int position) {
-        Country country = mCountries.get(position);
+        Country country = mCountriesFiltered.get(position);
         String countryNames = country.getCountry();
         holder.country.setText(countryNames);
 
@@ -43,7 +50,37 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
     //counts total number of rows on the list
     @Override
     public int getItemCount() {
-        return mCountries.size();
+        return mCountriesFiltered.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();                //converting sequence to string
+                if (charString.isEmpty()) {                                 //check to make sure char string not empty
+                    mCountriesFiltered = mCountries;                        //returns original list
+                } else{
+                    ArrayList<Country> filteredList = new ArrayList<>();
+                    for(Country country : mCountries) {
+                        if(country.getCountry().toLowerCase().contains(charString.toLowerCase())){    //if search value is included in country names
+                            filteredList.add(country);                                                //adds it to the filtered list
+                        }
+                    }
+                    mCountriesFiltered = filteredList;
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mCountriesFiltered;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults results) {
+                mCountriesFiltered = (ArrayList<Country>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     //this method creates a view holder
@@ -70,7 +107,24 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
 
         public interface clickListener{
             void onClick(int position);
-
-
     }
+
+    //sort method
+    public void sort(final int sortMethod){
+        if(mCountriesFiltered.size() > 0){              //check that it is not empty
+            Collections.sort(mCountriesFiltered, new Comparator<Country>() {
+                @Override
+                public int compare(Country o1, Country o2) {
+                    if (sortMethod == 1){
+                        return o1.getNewConfirmed().compareTo(o2.getNewConfirmed());
+                    } else if (sortMethod == 2){
+                        return o1.getTotalConfirmed().compareTo(o2.getTotalConfirmed());
+                    }
+                    return o1.getCountry().compareTo(o2.getCountry()); //if not specified it will sort by country name
+                }
+            });
+        }
+        notifyDataSetChanged();
+    }
+
 }
