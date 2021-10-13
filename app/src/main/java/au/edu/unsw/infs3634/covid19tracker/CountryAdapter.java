@@ -116,9 +116,9 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
                 @Override
                 public int compare(Country o1, Country o2) {
                     if (sortMethod == 1){
-                        return o1.getNewConfirmed().compareTo(o2.getNewConfirmed());
+                        return o2.getNewConfirmed().compareTo(o1.getNewConfirmed());
                     } else if (sortMethod == 2){
-                        return o1.getTotalConfirmed().compareTo(o2.getTotalConfirmed());
+                        return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                     }
                     return o1.getCountry().compareTo(o2.getCountry()); //if not specified it will sort by country name
                 }
