@@ -10,13 +10,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.SearchView;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements CountryAdapter.clickListener{
     //Logging
     public static final String TAG = "MainActivity";
-    public ArrayList<Country> mCountries = Country.getCountries();
+    public List<Country> mCountries = Country.getCountries();
     public RecyclerView mRecyclerView;
     public CountryAdapter countryAdapter;
 

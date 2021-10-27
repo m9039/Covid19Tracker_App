@@ -12,14 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Locale;
+import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewHolder> implements Filterable {
-    public ArrayList<Country> mCountries;
-    public ArrayList<Country> mCountriesFiltered;
+    public List<Country> mCountries;
+    public List<Country> mCountriesFiltered;
     public clickListener mListener;
 
-    public CountryAdapter(Context context, ArrayList<Country> countries, clickListener listener ){
+    public CountryAdapter(Context context, List<Country> countries, clickListener listener ){
         this.mCountries = countries;
         this.mCountriesFiltered = countries;            //this is so that everytime you search, you keep orignial copy
         this.mListener = listener;
@@ -62,7 +62,7 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
                 if (charString.isEmpty()) {                                 //check to make sure char string not empty
                     mCountriesFiltered = mCountries;                        //returns original list
                 } else{
-                    ArrayList<Country> filteredList = new ArrayList<>();
+                    List<Country> filteredList = new ArrayList<>();
                     for(Country country : mCountries) {
                         if(country.getCountry().toLowerCase().contains(charString.toLowerCase())){    //if search value is included in country names
                             filteredList.add(country);                                                //adds it to the filtered list
@@ -77,7 +77,7 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults results) {
-                mCountriesFiltered = (ArrayList<Country>) results.values;
+                mCountriesFiltered = (List<Country>) results.values;
                 notifyDataSetChanged();
             }
         };
