@@ -65,7 +65,7 @@ public class DetailActivity extends AppCompatActivity {
                     mTotalRecovered.setText(df.format(country.getTotalRecovered()));
 
                     Glide.with(mFlag)
-                            .load("https://flagcdn.com/16x12/" +country.getCountryCode().toLowerCase()+".png")
+                            .load("https://flagcdn.com/160x120/" +country.getCountryCode().toLowerCase()+".png")
                             .into(mFlag);
                     //setting image from API
 

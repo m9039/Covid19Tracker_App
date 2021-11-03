@@ -93,7 +93,7 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
         holder.itemView.setTag(country.getCountryCode());
 
         Glide.with(holder.ivFlag)
-                .load("https://flagcdn.com/16x12/" +country.getCountryCode().toLowerCase()+".png")
+                .load("https://flagcdn.com/160x120/" +country.getCountryCode().toLowerCase()+".png")
                 .into(holder.ivFlag);
     }
 
