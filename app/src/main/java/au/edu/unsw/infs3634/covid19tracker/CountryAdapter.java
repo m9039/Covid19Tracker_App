@@ -6,51 +6,37 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewHolder> implements Filterable {
-    public List<Country> mCountries;
-    public List<Country> mCountriesFiltered;
+    public List<Country> mCountries, mCountriesFiltered;
     public clickListener mListener;
+    public static final int SORT_METHOD_NEW = 1;
+    public static final int SORT_METHOD_TOTAL = 2;
 
-    public CountryAdapter(Context context, List<Country> countries, clickListener listener ){
+
+    //constructor method for adapter class
+    public CountryAdapter(List<Country> countries, clickListener listener){
         this.mCountries = countries;
         this.mCountriesFiltered = countries;            //this is so that everytime you search, you keep orignial copy
         this.mListener = listener;
     }
 
-    //inflate the row layout when needed
-    @NonNull
-    @Override
-    public CountryAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, parent, false);
-        return new MyViewHolder(view, this, mListener);
-    }
-
-    //bind data to textview elements in each row
-    @Override
-    public void onBindViewHolder(@NonNull CountryAdapter.MyViewHolder holder, int position) {
-        Country country = mCountriesFiltered.get(position);
-        String countryNames = country.getCountry();
-        holder.country.setText(countryNames);
-
-        int totalCases = country.getTotalConfirmed();
-        holder.totalCases.setText(String.valueOf(totalCases));
-
-        int newCases = country.getNewConfirmed();
-        holder.newCases.setText("+"+ newCases);
-    }
-
-    //counts total number of rows on the list
-    @Override
-    public int getItemCount() {
-        return mCountriesFiltered.size();
+    public void setCountries(List<Country> countries){
+        mCountries.clear();
+        this.mCountries.addAll(countries);//add countries from API into recyclerview
+        notifyDataSetChanged();//notify UI changes made
     }
 
     @Override
@@ -83,41 +69,71 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
         };
     }
 
-    //this method creates a view holder
-    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        public final TextView country, totalCases, newCases;
-        clickListener mListener;
-        final CountryAdapter countryAdapter;
+    public interface clickListener{
+        void onCountryClick(View view, String countryCode);
+    }
 
-        public MyViewHolder(@NonNull View view, CountryAdapter countryAdapter, clickListener mListener) {
+    //inflate the row layout when needed
+    @NonNull
+    @Override
+    public CountryAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, parent, false);
+        return new MyViewHolder(view, mListener);
+    }
+
+    //bind data to textview elements in each row
+    @Override
+    public void onBindViewHolder(@NonNull CountryAdapter.MyViewHolder holder, int position) {
+        // Retrieve the country by it's position in filtered list
+        Country country = mCountriesFiltered.get(position);
+        DecimalFormat df = new DecimalFormat( "#,###,###,###" );
+        holder.country.setText(country.getCountry());
+        holder.totalCases.setText(df.format(country.getTotalConfirmed()));
+        holder.newCases.setText("+" + df.format(country.getNewConfirmed()));
+        holder.itemView.setTag(country.getCountryCode());
+
+        Glide.with(holder.ivFlag)
+                .load("https://flagcdn.com/16x12/" +country.getCountryCode().toLowerCase()+".png")
+                .into(holder.ivFlag);
+    }
+
+    //counts total number of rows on the list
+    @Override
+    public int getItemCount() {
+        return mCountriesFiltered.size();
+    }
+
+    //this method creates a view holder
+    public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private TextView country, totalCases, newCases;
+        private clickListener mListener;
+        ImageView ivFlag;
+
+        public MyViewHolder(@NonNull View view, clickListener mListener) {
             super(view);
+            this.mListener = mListener;
+            view.setOnClickListener(this);
             country = view.findViewById(R.id.tvRecyclerCountry);
             totalCases = view.findViewById(R.id.tvRecyclerTotalCases);
             newCases = view.findViewById(R.id.tvRecyclerNewCases);
-            this.countryAdapter = countryAdapter;
-            this.mListener = mListener;
-            view.setOnClickListener(this);
+            ivFlag = view.findViewById(R.id.ivFlag);
         }
 
         @Override
         public void onClick(View view) {
-            mListener.onClick(getAdapterPosition());
+            mListener.onCountryClick(view, (String) view.getTag());
         }
-        }
+    };
 
-        public interface clickListener{
-            void onClick(int position);
-    }
-
-    //sort method
-    public void sort(final int sortMethod){
-        if(mCountriesFiltered.size() > 0){              //check that it is not empty
+    // Use the Java Collection.sort() and Comparator methods to sort the list
+    public void sort(final int sortMethod) {
+        if (mCountriesFiltered.size() > 0) {              //check that it is not empty
             Collections.sort(mCountriesFiltered, new Comparator<Country>() {
                 @Override
                 public int compare(Country o1, Country o2) {
-                    if (sortMethod == 1){
+                    if (sortMethod == SORT_METHOD_NEW) {
                         return o2.getNewConfirmed().compareTo(o1.getNewConfirmed());
-                    } else if (sortMethod == 2){
+                    } else if (sortMethod == SORT_METHOD_TOTAL) {
                         return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                     }
                     return o1.getCountry().compareTo(o2.getCountry()); //if not specified it will sort by country name
@@ -126,5 +142,5 @@ public class CountryAdapter extends RecyclerView.Adapter <CountryAdapter.MyViewH
         }
         notifyDataSetChanged();
     }
-
 }
+

@@ -9,15 +9,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SearchView;
+
+import com.google.gson.Gson;
+
+import java.lang.reflect.Type;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements CountryAdapter.clickListener{
-    //Logging
-    public static final String TAG = "MainActivity";
-    public List<Country> mCountries = Country.getCountries();
-    public RecyclerView mRecyclerView;
-    public CountryAdapter countryAdapter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class MainActivity extends AppCompatActivity{
+    private RecyclerView mRecyclerView;
+    private CountryAdapter countryAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,26 +35,59 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.cl
 
         //Instantiate recyclerview
         mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        countryAdapter = new CountryAdapter(this, mCountries, this);
+        mRecyclerView.setHasFixedSize(true);
+
+        // Set the layout manager (Linear or Grid)
+        layoutManager = new LinearLayoutManager(this);
+        // layoutManager = new GridLayoutManager(this, 2);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        // Implement the ClickListener for the adapter
+        CountryAdapter.clickListener listener = new CountryAdapter.clickListener() {
+            @Override
+            public void onCountryClick(View view, String countryCode) {
+                launchDetailActivity(countryCode);
+            }
+        };
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.covid19api.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        CovidService service = retrofit.create(CovidService.class);
+        Call<au.edu.unsw.infs3634.covid19tracker.Response> responseCall = service.getResponse();
+        responseCall.enqueue(new Callback<au.edu.unsw.infs3634.covid19tracker.Response>() {
+            @Override
+            public void onResponse(Call<au.edu.unsw.infs3634.covid19tracker.Response> call, retrofit2.Response<au.edu.unsw.infs3634.covid19tracker.Response> response) {
+                List<Country> countries = response.body().getCountries();
+                countryAdapter.setCountries(countries);
+            }
+
+            @Override
+            public void onFailure(Call<au.edu.unsw.infs3634.covid19tracker.Response> call, Throwable t) {
+
+            }
+        });
+
+        // Create an adapter and supply the countries data to be displayed
+
+        Gson gson = new Gson();
+        au.edu.unsw.infs3634.covid19tracker.Response response = gson.fromJson(au.edu.unsw.infs3634.covid19tracker.Response.json, au.edu.unsw.infs3634.covid19tracker.Response.class);
+        countryAdapter = new CountryAdapter(response.getCountries(), listener);
+        countryAdapter.sort(CountryAdapter.SORT_METHOD_TOTAL);
+        // Connect the adapter with the RecyclerView
         mRecyclerView.setAdapter(countryAdapter);
 
-        //Logging
-        int x = 250;
-        Log.d(TAG, "this is an example of logging! " + x);
-
-        //Debugging
-        int y = 100, z = 200;
-        int total = y + z;
-
     }
 
-    public void onClick(int position){
-        String message = mCountries.get(position).getId();
-        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-        intent.putExtra("eMessage", message);
+    // Called when the user taps the Launch Detail Activity button
+    private void launchDetailActivity(String message){
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra(DetailActivity.INTENT_MESSAGE, message);
         startActivity(intent);
     }
+
 
     //adds the menu
     @Override
@@ -84,6 +126,5 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.cl
                 return super.onOptionsItemSelected(item);
         }
     }
-
 }
 

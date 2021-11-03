@@ -4,61 +4,81 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+
+import java.text.DecimalFormat;
+import java.util.List;
+
 public class DetailActivity extends AppCompatActivity {
+    private static final String TAG = "DetailActivity";
+    public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covid19tracker.intent_message";
+    private TextView mCountry, mNewCases, mTotalCases, mNewDeaths, mTotalDeaths, mNewRecovered, mTotalRecovered;
+    private ImageButton btnSearch;
+    private ImageView mFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        ImageButton btn = findViewById(R.id.btnShowGoogle);
+        mCountry = findViewById(R.id.tvCountry);
+        mNewCases = findViewById(R.id.tvNewCases);
+        mTotalCases = findViewById(R.id.tvTotalCases);
+        mNewDeaths = findViewById(R.id.tvNewDeaths);
+        mTotalDeaths = findViewById(R.id.tvTotalDeaths);
+        mNewRecovered = findViewById(R.id.tvNewRecovered);
+        mTotalRecovered = findViewById(R.id.tvTotalRecovered);
+        btnSearch = findViewById(R.id.btnShowGoogle);
+        mFlag = findViewById(R.id.ivFlag);
 
-        btn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                googleSearch();
+        // Get the Intent that started this activity and extract the string
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        if (intent.hasExtra(INTENT_MESSAGE)) {
+            Log.d(TAG, "INTENT_MESSAGE = " + bundle.getStringArrayList(INTENT_MESSAGE) );
+            String countryCode = intent.getStringExtra(INTENT_MESSAGE);
+
+            Gson gson = new Gson();
+            Response response = gson.fromJson(Response.json,Response.class);
+
+            List<Country> countries = response.getCountries();
+            for(final Country country : countries) {
+                if (country.getCountryCode().equals(countryCode)) {
+                    DecimalFormat df = new DecimalFormat( "#,###,###,###" );
+                    // Set title of the activity
+                    setTitle(country.getCountryCode());
+                    // Set the country name
+                    mCountry.setText(country.getCountry());
+                    // Set value for all other text view elements
+                    mNewCases.setText(df.format(country.getNewConfirmed()));
+                    mTotalCases.setText(df.format(country.getTotalConfirmed()));
+                    mNewDeaths.setText(df.format(country.getNewDeaths()));
+                    mTotalDeaths.setText(df.format(country.getTotalDeaths()));
+                    mNewRecovered.setText(df.format(country.getNewRecovered()));
+                    mTotalRecovered.setText(df.format(country.getTotalRecovered()));
+
+                    Glide.with(mFlag)
+                            .load("https://flagcdn.com/16x12/" +country.getCountryCode().toLowerCase()+".png")
+                            .into(mFlag);
+                    //setting image from API
+
+                    // Add an intent to open Google search for "Covid19" + country name
+                    btnSearch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com.au/search?q=covid " + country.getCountry()));
+                            startActivity(intent);
+                        }
+                    });
+                }
             }
-        });
-
-        Intent intent = getIntent();
-        String message = intent.getStringExtra("eMessage"); //id
-
-        Country country = Country.getCountry(message); //add debugger to check if it is getting correct country
-        setTitle(country.getCountryCode()); //displays country code in title
-
-        TextView Country = findViewById(R.id.tvCountry);
-        Country.setText(country.getCountry());
-
-        TextView NewCases = findViewById(R.id.tvNewCases);
-        NewCases.setText(""+country.getNewConfirmed());
-
-        TextView TotalCases = findViewById(R.id.tvTotalCases);
-        TotalCases.setText(String.valueOf(country.getTotalConfirmed()));
-
-        TextView NewDeaths = findViewById(R.id.tvNewDeaths);
-        NewDeaths.setText(""+country.getNewDeaths());
-
-        TextView TotalDeaths = findViewById(R.id.tvTotalDeaths);
-        TotalDeaths.setText(""+country.getTotalDeaths());
-
-        TextView NewRecovered = findViewById(R.id.tvNewRecovered);
-        NewRecovered.setText(""+country.getNewRecovered());
-
-        TextView TotalRecovered = findViewById(R.id.tvTotalRecovered);
-        TotalRecovered.setText(""+country.getTotalRecovered());
+        }
     }
-
-    public void googleSearch() {
-        Intent intent = getIntent();
-        String message = intent.getStringExtra("eMessage"); //id
-        Country country = Country.getCountry(message); //add debugger to check if it is getting correct country
-        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=covid+" + country.getCountry()));
-        startActivity(i);
-    }
-
-
 }

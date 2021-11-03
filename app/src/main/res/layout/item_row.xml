@@ -15,7 +15,7 @@
         android:text="TextView"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toEndOf="@+id/ivFlag"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -37,9 +37,9 @@
         app:layout_constraintTop_toTopOf="@+id/tvRecyclerTotalCases" />
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/ivFlag"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
         android:cropToPadding="false"
