@@ -3,6 +3,8 @@ package au.edu.unsw.infs3634.covid19tracker;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +18,7 @@ import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,11 +59,24 @@ public class MainActivity extends AppCompatActivity{
                 .build();
 
         CovidService service = retrofit.create(CovidService.class);
+        CountryDatabase db = Room.databaseBuilder(getApplicationContext(), CountryDatabase.class, "country-database")
+                .build();
+
         Call<au.edu.unsw.infs3634.covid19tracker.Response> responseCall = service.getResponse();
         responseCall.enqueue(new Callback<au.edu.unsw.infs3634.covid19tracker.Response>() {
             @Override
             public void onResponse(Call<au.edu.unsw.infs3634.covid19tracker.Response> call, retrofit2.Response<au.edu.unsw.infs3634.covid19tracker.Response> response) {
                 List<Country> countries = response.body().getCountries();
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        db.countryDao().insert(countries.toArray(new Country[0]));
+                        int index = 0;
+                        for (Country country : countries){
+                            ++index;
+                        }
+                    }
+                });
                 countryAdapter.setCountries(countries);
             }
 

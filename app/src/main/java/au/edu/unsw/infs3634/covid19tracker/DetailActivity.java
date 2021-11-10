@@ -1,6 +1,8 @@
 package au.edu.unsw.infs3634.covid19tracker;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,7 +40,9 @@ public class DetailActivity extends AppCompatActivity {
         btnSearch = findViewById(R.id.btnShowGoogle);
         mFlag = findViewById(R.id.ivFlag);
 
-        // Get the Intent that started this activity and extract the string
+        CountryDatabase db = Room.databaseBuilder(getApplicationContext(), CountryDatabase.class, "country-database")
+                .build();
+
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         if (intent.hasExtra(INTENT_MESSAGE)) {
@@ -51,6 +55,7 @@ public class DetailActivity extends AppCompatActivity {
             List<Country> countries = response.getCountries();
             for(final Country country : countries) {
                 if (country.getCountryCode().equals(countryCode)) {
+                    db.countryDao().getCountries(countryCode);
                     DecimalFormat df = new DecimalFormat( "#,###,###,###" );
                     // Set title of the activity
                     setTitle(country.getCountryCode());
